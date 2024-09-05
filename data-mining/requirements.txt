@@ -1,0 +1,8 @@
+jupyter
+jupyterlab-vim
+ucimlrepo
+numpy
+pandas
+scikit-learn
+matplotlib
+ipympl
