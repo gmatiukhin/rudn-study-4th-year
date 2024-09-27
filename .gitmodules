@@ -1,0 +1,3 @@
+[submodule "infosec"]
+	path = infosec
+	url = https://github.com/gmatiukhin/study_2024-2025_infosec
