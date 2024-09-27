@@ -1,0 +1,88 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           system-design
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/gmatiukhin/system-design#readme>
+homepage:       https://github.com/gmatiukhin/system-design#readme
+bug-reports:    https://github.com/gmatiukhin/system-design/issues
+author:         Grigorii Matiukhin
+maintainer:     contact@gmatiukhin.site
+copyright:      2024 Grigorii Matiukhin
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/gmatiukhin/system-design
+
+executable lab1-exe
+  main-is: lab1.lhs
+  other-modules:
+      Paths_system_design
+  autogen-modules:
+      Paths_system_design
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Chart ==1.9.5
+    , Chart-diagrams ==1.9.5.1
+    , base >=4.7 && <5
+    , directory
+  default-language: Haskell2010
+
+executable lab2-exe
+  main-is: lab2.lhs
+  other-modules:
+      Paths_system_design
+  autogen-modules:
+      Paths_system_design
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Chart ==1.9.5
+    , Chart-diagrams ==1.9.5.1
+    , base >=4.7 && <5
+    , directory
+  default-language: Haskell2010
+
+executable lab3-exe
+  main-is: lab3.lhs
+  other-modules:
+      Paths_system_design
+  autogen-modules:
+      Paths_system_design
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Chart ==1.9.5
+    , Chart-diagrams ==1.9.5.1
+    , base >=4.7 && <5
+    , directory
+  default-language: Haskell2010
+
+executable lab4-exe
+  main-is: lab4.lhs
+  other-modules:
+      Paths_system_design
+  autogen-modules:
+      Paths_system_design
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Chart ==1.9.5
+    , Chart-diagrams ==1.9.5.1
+    , base >=4.7 && <5
+    , directory
+  default-language: Haskell2010
