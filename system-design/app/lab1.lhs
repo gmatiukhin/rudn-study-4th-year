@@ -158,6 +158,10 @@ $\underset{\lambda_1}{M}\underset{\lambda_2}{M}|\underset{\mu_1}{M}\underset{\mu
   \end{cases}
 \end{gather}
 
+
+
+Обозначим $\rho_1 = \frac{\lambda_1}{\mu}, \rho_2 = \frac{\lambda_2}{\mu}$.
+
 Система уравнений локального баланса (СУЛБ):
 
 \begin{gather}
