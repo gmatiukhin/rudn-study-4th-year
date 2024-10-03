@@ -15,6 +15,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{scrextend}
+\usepackage{seqsplit}
 
 \usepackage{ifthen}
 \usepackage{tikz}
@@ -75,7 +76,7 @@ $\underset{\lambda_1}{M}\underset{\lambda_2}{M}|\underset{\mu_1}{M}\underset{\mu
   $X$ & -- & \makecell[tl]{пространство состояний системы;} \\
   $n$ & -- & \makecell[tl]{число обслуживаемых в системе запросов;} \\
   $B_1$, $B_2$ & -- & \makecell[tl]{множество блокировок запросов на предоставление услуги 1, 2-го типа;} \\
-  $B_1$, $B_2$ & -- & \makecell[tl]{множество приема запросов на предоставление услуги 1, 2-го типа.}
+  $S_1$, $S_2$ & -- & \makecell[tl]{множество приема запросов на предоставление услуги 1, 2-го типа.}
 \end{tabular}
 
 Схема модели:
@@ -107,10 +108,10 @@ $\underset{\lambda_1}{M}\underset{\lambda_2}{M}|\underset{\mu_1}{M}\underset{\mu
   \begin{tikzpicture}[node distance=2cm, scale=0.7, every node/.style={scale=0.7}]
     \node [square] (o) {$0$};
     \node [square, right of=o] (l) {$1$};
-    \node [hiddenSquare, right of=l] (elipses1) {\ldots}
+    \node [hiddenSquare, right of=l] (elipses1) {\ldots};
     \node [square, right of=elipses1] (n1) {$n-1$};
     \node [square, right of=n1] (n) {$n$};
-    \node [hiddenSquare, right of=n] (elipses2) {\ldots}
+    \node [hiddenSquare, right of=n] (elipses2) {\ldots};
     \node [square, right of=elipses2] (c1) {$C-1$};
     \node [square, right of=c1] (c) {$C$};
 
@@ -219,13 +220,13 @@ $\underset{\lambda_1}{M}\underset{\lambda_2}{M}|\underset{\mu_1}{M}\underset{\mu
 
 \subsection{Как устроена эта программа}
 
-Исходный код этого очета, написанный с использованием \LaTeX и исходный код этой программы
+Исходный код этого очета, написанный с использованием \LaTeX{} и исходный код этой программы
 --- один и тот же файл.
 Это возможно, потому что Haskell поддерживает "Грамотное программирование" в файлах \texttt{.lhs}.
 Это значит, что компилятор смотрит только на текст в специально обозначенных местах.
 В случае Haskell код должен находится между \verb!\begin{code}! и \verb!\end{code}!.
 
-Например этот кусок файла будет просто текстом для \LaTeX компилятора,
+Например этот кусок файла будет просто текстом для \LaTeX{} компилятора,
 но программой, выводящей \texttt{hello} в консоль для Haskell компилятора:
 
 \noindent
@@ -384,7 +385,7 @@ plotAverageRequests mu c dir name =
 \subsubsection{Текстовый вывод}
 
 Чтобы показывать текстовый вывод программы в финальном отчете
-запишем его в отдельный \LaTeX файл, а затем включим его в отчет
+запишем его в отдельный \LaTeX{} файл, а затем включим его в отчет
 используя \verb!\include!.
 
 Но сначала, нам нужна функция, которая подсчитает интересующие нас
@@ -397,6 +398,9 @@ writeTexOutput l1 l2 mu c tbp fname = do
         rho2 = l2 / mu
     writeFile fname
         $ printf "%% Automatically generated output file!\n"
+        ++ printf "Распределение вероятностей:\\\\\n"
+        ++ printf "\\seqsplit{%s}\\\\\n"
+            (show [stationaryProbabilityDistribution rho1 rho2 c n | n <- [0..c]])
         ++ printf "\\begin{tabular}{l l l l}\n"
         ++ printf "Вероятность блокировки по по времени & $E$ & = & %f \\\\\n" tbp
         ++ printf "Вероятность блокировки по вызовам & $B_1$ & = & %f \\\\\n"
