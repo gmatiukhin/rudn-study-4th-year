@@ -18,8 +18,12 @@
 
 \usepackage{ifthen}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, bending, math}
-\tikzstyle{node} = [circle, text centered, draw, minimum width=0.5cm, minimum height=0.5cm]
+\usetikzlibrary{shapes.geometric, arrows.meta, bending, math, decorations.pathreplacing}
+
+\tikzstyle{circ} = [circle, text centered, draw, minimum size=0.7cm, inner sep=0cm]
+\tikzstyle{smallCirc} = [circle, text centered, draw, fill=black, minimum size=0.2cm, inner sep=0cm]
+\tikzstyle{square} = [regular polygon, regular polygon sides=4, inner sep=0cm, text centered, draw, minimum size=1.7cm]
+\tikzstyle{hiddenSquare} = [regular polygon, regular polygon sides=4, inner sep=0cm, text centered, minimum size=2.5cm]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
 \usepackage{minted}
@@ -31,7 +35,7 @@
 \graphicspath{ {assets/lab1/images/} }
 
 \author{Григорий Матюхин}
-\date{\formatdate{24}{09}{2024}}
+\date{\today}
 \title{
 	Отчет по лабораторной работе \textnumero1: \\
 	\large Полнодоступная двухсервисная модель Эрланга с одинаковыми интенсивностями обслуживания.}
@@ -41,7 +45,6 @@
 \newpage
 \tableofcontents
 \newpage
-
 
 \section{Теориетические сведения}
 
@@ -75,21 +78,64 @@ $\underset{\lambda_1}{M}\underset{\lambda_2}{M}|\underset{\mu_1}{M}\underset{\mu
   $B_1$, $B_2$ & -- & \makecell[tl]{множество приема запросов на предоставление услуги 1, 2-го типа.}
 \end{tabular}
 
+Схема модели:
 
-% Todo: picture 1
-\begin{tikzpicture}
-  
-\end{tikzpicture}
+\begin{center}
+  \begin{tikzpicture}[node distance=1cm, scale=0.7, every node/.style={scale=0.7}]
+    \node (req1) at (0, -1) {\LargeУслуга 1};
+    \node (req2) at (0, -2){\LargeУслуга 2};
+
+    \node [circ] at (4, 0) (start) {};
+    \node [smallCirc] at (4, -1) (sm1) {};
+    \node [smallCirc] at (4, -1.5) (sm2) {};
+    \node [smallCirc] at (4, -2) (sm3) {};
+    \node [circ] at (4, -3) (end) {};
+
+    \draw[decorate, decoration={brace, raise=10pt, amplitude=5pt}, line width=1.1pt, scale=1.5] (start.north) -- (end.south) node [midway, anchor=west, xshift=23pt] {\Large$C$};
+
+    \draw [arrow] (req1) -- node[anchor=south] {\large$\lambda_1, \mu$} (3.5, -1);
+    \draw [arrow] (req2) -- node[anchor=south] {\large$\lambda_2, \mu$} (3.5, -2);
+  \end{tikzpicture}
+\end{center}
 
 Пространство состояний системы:
 \begin{gather}
   X = \left\{0,..., C\right\}, \left|X\right| = C + 1
 \end{gather}
 
-% Todo: picture 2
-\begin{tikzpicture}
-  
-\end{tikzpicture}
+\begin{center}
+  \begin{tikzpicture}[node distance=2cm, scale=0.7, every node/.style={scale=0.7}]
+    \node [square] (o) {$0$};
+    \node [square, right of=o] (l) {$1$};
+    \node [hiddenSquare, right of=l] (elipses1) {\ldots}
+    \node [square, right of=elipses1] (n1) {$n-1$};
+    \node [square, right of=n1] (n) {$n$};
+    \node [hiddenSquare, right of=n] (elipses2) {\ldots}
+    \node [square, right of=elipses2] (c1) {$C-1$};
+    \node [square, right of=c1] (c) {$C$};
+
+    \draw [arrow] (o) .. controls(1, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (l);
+    \draw [arrow] (l) .. controls(1, -1.2) .. node[anchor=north] {$\mu$} (o);
+
+    \draw [arrow] (l) .. controls(3, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (elipses1);
+    \draw [arrow] (elipses1) .. controls(3, -1.2) .. node[anchor=north] {$2\mu$} (l);
+
+    \draw [arrow] (elipses1) .. controls(5, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (n1);
+    \draw [arrow] (n1) .. controls(5, -1.2) .. node[anchor=north] {$(n-1)\mu$} (elipses1);
+
+    \draw [arrow] (n1) .. controls(7, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (n);
+    \draw [arrow] (n) .. controls(7, -1.2) .. node[anchor=north] {$n\mu$} (n1);
+
+    \draw [arrow] (n) .. controls(9, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (elipses2);
+    \draw [arrow] (elipses2) .. controls(9, -1.2) .. node[anchor=north] {$(n+1)\mu$} (n);
+
+    \draw [arrow] (elipses2) .. controls(11, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (c1);
+    \draw [arrow] (c1) .. controls(11, -1.2) .. node[anchor=north] {$(C-1)\mu$} (elipses2);
+
+    \draw [arrow] (c1) .. controls(13, 1.2) .. node[anchor=south] {$\lambda_1 + \lambda_2$} (c);
+    \draw [arrow] (c) .. controls(13, -1.2) .. node[anchor=north] {$C\mu$} (c1);
+  \end{tikzpicture}
+\end{center}
 
 Множество блокировок запросов на предоставление услуги $i$-типа, $i = 1,2$:
 \begin{gather}
@@ -362,7 +408,9 @@ writeTexOutput l1 l2 mu c tbp fname = do
         ++ printf "\\end{tabular}"
 \end{code}
 
-\section{Результаты}
+\subsection{\texttt{main} функция}
+
+Тепеь напишем функцию \texttt{main}, которя является точкой входа в программу.
 
 \begin{code}
 main :: IO ()
@@ -390,6 +438,8 @@ main = do
         "Request Blocking Probability for lambda_2"
     plotAverageRequests mu c imgDir "Average Requests"
 \end{code}
+
+\section{Результаты}
 
 \begingroup
 \let\clearpage\relax
