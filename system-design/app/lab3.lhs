@@ -26,6 +26,7 @@
 \tikzstyle{smallCirc} = [circle, text centered, draw, fill=black, minimum size=0.2cm, inner sep=0cm]
 \tikzstyle{state} = [rectangle, text centered, draw, minimum size=1cm]
 \tikzstyle{arrow} = [thick,->,>=stealth]
+\tikzstyle{arrowShort} = [thick,->,>=stealth,shorten >=0.35cm]
 
 \usepackage{minted}
 \newminted[code]{haskell}{}
@@ -98,6 +99,45 @@
 Построим диаграмму интенсивностей переходов для центрального состояния:
 
 \begin{center}
+  \begin{tikzpicture}[node distance=4.5cm, scale=0.7, every node/.style={scale=0.7}]
+    \node [state] (c) {$n_1, n_2$};
+    \node [state, right of=c] (r) {$n_1+1, n_2$};
+    \node [state, left of=c] (l) {$n_1-1, n_2$};
+    \node [state, above of=c] (a) {$n_1, n_2+1$};
+    \node [state, below of=c] (b) {$n_1, n_2-1$};
+
+
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrow] (c) -- node [anchor=south] {$\frac{C}{(n_1+1+n_2)\theta_1}(n_1+1)$} (r);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrow] (r) -- node [anchor=north] {$\lambda_1$} (c);
+    \end{scope}
+
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrow] (l) -- node [anchor=south] {$\lambda_1$} (c);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrow] (c) -- node [anchor=north] {$\frac{C}{(n_1+n_2)\theta_1}n_1$} (l);
+    \end{scope}
+
+    \begin{scope}[transform canvas={xshift=.3em}]
+      \draw [arrow] (c) -- node [anchor=west] {$\frac{C}{(n_1+n_2)\theta_2}n_2$} (b);
+    \end{scope}
+    \begin{scope}[transform canvas={xshift=-.3em}]
+      \draw [arrow] (b) -- node [anchor=east] {$\lambda_2$} (c);
+    \end{scope}
+
+    \begin{scope}[transform canvas={xshift=-.3em}]
+      \draw [arrow] (a) -- node [anchor=east] {$\frac{C}{(n_1+1+n_2)\theta_2}(n_2+1)$} (c);
+    \end{scope}
+    \begin{scope}[transform canvas={xshift=.3em}]
+      \draw [arrow] (c) -- node [anchor=west] {$\lambda_2$} (a);
+    \end{scope}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
   \begin{tikzpicture}[node distance=2cm, scale=0.7, every node/.style={scale=0.7}]
   \end{tikzpicture}
 \end{center}
@@ -140,7 +180,45 @@
 \end{gather}
 
 Чтобы выписать систему уравнений частичного баланса (СУЧБ), проверим критерий
-Колмогорова. Рассмотрим произвольный замкнутый контур
+Колмогорова. Рассмотрим произвольный замкнутый контур:
+
+\begin{center}
+  \begin{tikzpicture}[node distance=4cm, scale=0.7, every node/.style={scale=0.7}]
+    \node [rectangle] (c) {};
+    \node [state, right of=c] (r) {$n_1, n_2-1$};
+    \node [state, left of=c] (l) {$n_1-1, n_2$};
+    \node [state, above of=c] (a) {$n_1, n_2$};
+    \node [state, below of=c] (b) {$n_1-1, n_2-1$};
+
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrowShort] (r) -- node [anchor=west] {$\lambda_2$} (a);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrowShort] (a) -- node [anchor=east] {$\frac{Cn_2}{(n_1+n_2)\theta_1}$} (r);
+    \end{scope}
+
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrowShort] (b) -- node [anchor=east] {$\lambda_1$} (r);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrowShort] (r) -- node [anchor=west] {$\frac{C(n_2-1)}{(n_1+n_2-1)\theta_1}$} (b);
+    \end{scope}
+
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrowShort] (b) -- node [anchor=east] {$\lambda_2$} (l);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrowShort] (l) -- node [anchor=west] {$\frac{C(n_1-1)}{(n_1-1+n_2)\theta_2}$} (b);
+    \end{scope}
+
+    \begin{scope}[transform canvas={yshift=-.3em}]
+      \draw [arrowShort] (a) -- node [anchor=west] {$\frac{Cn_1}{(n_1+n_2)\theta_1}$} (l);
+    \end{scope}
+    \begin{scope}[transform canvas={yshift=.3em}]
+      \draw [arrowShort] (l) -- node [anchor=east] {$\lambda_1$} (a);
+    \end{scope}
+  \end{tikzpicture}
+\end{center}
 
 Рассмотрим произведение интенсивностей переходов:
 
@@ -156,7 +234,7 @@
 
 \begin{gather}
   \begin{cases}
-    p(n_1, n_2)\frac{C}{(n_1+n_2)\theta_1}n_1 = \lambda_1p(n_1-1,n_2),n_1 > 0,
+    p(n_1, n_2)\frac{C}{(n_1+n_2)\theta_1}n_1 = \lambda_1p(n_1-1,n_2),n_1 > 0,\\
     p(n_1, n_2)\frac{C}{(n_1+n_2)\theta_2}n_2 = \lambda_2p(n_1,n_2-1),n_2 > 0,
   \end{cases},
   (n_1, n_2)\in X
