@@ -268,19 +268,20 @@ import qualified Data.Text as T
 Определим функцию стационарного распределения вероятностей состояний системы \eqref{eq:spd}:
 
 \begin{code}
-stationaryProbabilityDistribution :: Double -> Double -> Double -> Double -> Double -> Double
+stationaryProbabilityDistribution
+    :: Double -> Double -> Double -> Double -> Double -> Double
 stationaryProbabilityDistribution rho1 rho2 c g n
     | 1 <= n && n <= g = p0 * t1 n
     | otherwise = p0 * t2 n
-      where
-        t1 :: Double -> Double
-        t1 a = (rho1 + rho2) ** a / factorial a
-        t2 :: Double -> Double
-        t2 a = (rho1 + rho2) ** g * rho1 ** (a - g) / factorial a
-        p0 = (sum [t1 i | i <- [0 .. g]] + sum [t2 i | i <- [g + 1 .. c]]) ** (-1)
-        factorial :: Double -> Double
-        factorial 0 = 1
-        factorial i = i * factorial (i - 1)
+  where
+    t1 :: Double -> Double
+    t1 a = (rho1 + rho2) ** a / factorial a
+    t2 :: Double -> Double
+    t2 a = (rho1 + rho2) ** g * rho1 ** (a - g) / factorial a
+    p0 = (sum [t1 i | i <- [0 .. g]] + sum [t2 i | i <- [g + 1 .. c]]) ** (-1)
+    factorial :: Double -> Double
+    factorial 0 = 1
+    factorial i = i * factorial (i - 1)
 \end{code}
 
 Определим вероятность блокировки по времени для запросов на представление услуг 1-го типа \eqref{eq:tbp1}:
@@ -355,7 +356,7 @@ getValues = M.map read . M.fromList . map getParts . getLines
     getParts valueLine = (head subMatches, subMatches !! 1)
       where
         (_, _, _, subMatches) = valueLine =~ valueRegex
-          :: (String, String, String, [String])
+            :: (String, String, String, [String])
     valueRegex = "^\\s*\\$\\\\?(\\w+)\\$\\s*&\\s*=\\s*&\\s*([0-9.]+)?"
 \end{code}
 
@@ -374,7 +375,7 @@ plotTimeBlockingProb tbp c dir name =
     toFile def (dir ++ prepFileName name ++ ".svg") $ do
         layout_title .= name
         setColors [opaque blue]
-        plot (line "" [[(x, tbp x) | x <- [0, 0.5 .. c]]])
+        plot (line "" [[(x, tbp x) | x <- [0.5, 1 .. c]]])
 
 plotAverageRequests :: (Double -> Double -> Double) -> Double -> FilePath -> String -> IO ()
 plotAverageRequests dist c dir name =

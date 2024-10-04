@@ -341,7 +341,7 @@ getValues = M.map read . M.fromList . map getParts . getLines
     getParts valueLine = (head subMatches, subMatches !! 1)
       where
         (_, _, _, subMatches) = valueLine =~ valueRegex
-          :: (String, String, String, [String])
+            :: (String, String, String, [String])
     valueRegex = "^\\s*\\$\\\\?(\\w+)\\$\\s*&\\s*=\\s*&\\s*([0-9.]+)?"
 \end{code}
 
@@ -364,7 +364,7 @@ plotTimeBlockingProb mu c dir name =
             in plot (line "" [[(x, tbp x) | x <- [0, 0.5 .. c]]])
 
 plotRequestBlockingProbability
-  ::Double -> Double ->  Double -> Double -> FilePath -> String -> IO ()
+    ::Double -> Double ->  Double -> Double -> FilePath -> String -> IO ()
 plotRequestBlockingProbability lambda other_lambda mu c dir name =
     toFile def (dir ++ prepFileName name ++ ".svg") $ do
         layout_title .= name
