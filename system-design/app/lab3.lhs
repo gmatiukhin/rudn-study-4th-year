@@ -473,8 +473,10 @@ writeTexOutput l1 l2 t1 t2 n1_max n2_max c fname = do
             (averageTime req_avg1 l1)
         ++ printf "Среднее время обслуживания типа 2 & $T_1$ & = & %f \\\\\n"
             (averageTime req_avg2 l2)
-        ++ printf "Вероятность блокировки по времени & $E$ & = & %f\n"
+        ++ printf "Вероятность блокировки по времени & $E$ & = & %f\n \\\\\n"
             timeBlockingProbability
+        ++ printf "Мощьность простантства состояний & $\\left|X\\right|$ & = & %f\n"
+            ((n1_max + 1) * (n2_max + 1))
         ++ printf "\\end{tabular}"
 \end{code}
 
