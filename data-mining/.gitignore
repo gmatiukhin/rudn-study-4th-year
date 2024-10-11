@@ -1,3 +1,5 @@
+*.zip
+*.csv
 *.db
 **/checkpoints
 # Byte-compiled / optimized / DLL files
