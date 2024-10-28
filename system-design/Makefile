@@ -1,13 +1,18 @@
-.PHONY: haskell tex watch
+.PHONY: haskell tex watch texwatch
 
-haskell:
+mkdir:
+	@mkdir -p assets/lab{1,2,3,4}/{tex,images}
+
+haskell: mkdir
 	@stack run $(lab)-exe
 
-tex: haskell
+tex: mkdir
 	@latexmk ./app/$(lab).lhs -jobname=./assets/$(lab)/tex/$(lab) --shell-escape -pdf
 
+all: haskell tex
+
 watch:
-	@echo "./app/$(lab).lhs" | entr -n -s "make make tex lab=$(lab)"
+	@echo "./app/$(lab).lhs" | entr -n -s "make all lab=$(lab)"
 
 texwatch:
-	@latexmk ./app/$(lab).lhs -jobname=./assets/$(lab)/tex/$(lab) --shell-escape -pvc -pdf
+	@echo "./app/$(lab).lhs" | entr -n -s "make tex lab=$(lab)"

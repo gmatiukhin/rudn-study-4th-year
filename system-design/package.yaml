@@ -23,6 +23,7 @@ dependencies:
   - directory
   - containers
   - text
+  - hint
 ghc-options:
   - -Wall
   - -Wcompat
