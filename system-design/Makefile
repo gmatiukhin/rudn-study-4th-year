@@ -1,5 +1,7 @@
 .PHONY: haskell tex watch texwatch
 
+all: mkdir haskell tex
+
 mkdir:
 	@mkdir -p assets/lab{1,2,3,4}/{tex,images}
 
@@ -8,8 +10,6 @@ haskell: mkdir
 
 tex: mkdir
 	@latexmk ./app/$(lab).lhs -jobname=./assets/$(lab)/tex/$(lab) --shell-escape -pdf
-
-all: haskell tex
 
 watch:
 	@echo "./app/$(lab).lhs" | entr -n -s "make all lab=$(lab)"
