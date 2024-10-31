@@ -60,20 +60,19 @@
   \True = 1;
   \False = 0;
   % Task parameters
-  \C = 4;
-  \g = 3;
+  \C = 7;
+  \g = 5;
   \lambdal = 1;
   \lambdaZ = 2;
   \m = 2;
   \rhol = \lambdal / \m;
   \rhoZ = \lambdaZ / \m;
   % Edge function for the possible state space
-  function edge(\x) { return \C - \x; };
+  function edge(\x) { return (\C - \x) / 2; };
   % So that we don't loop too much
   \drawLimit = 10;
   % This limit is a higher because we need some hidden nodes
   % to draw the visible ones correctly
-  \prevLimit = \drawLimit - 1;
   function floorEdge(\x) { return floor(edge(\x)); };
   \maxX = \g;
   function maxY(\l) {
@@ -91,9 +90,9 @@
   function inverseFloorEdge(\y) {
     int \currY, \prevY, \ret, \isRetSet;
     \isRetSet = \False;
-    \ret = 0;
+    \ret = -1;
     \currY = floorEdge(0);
-    for \x in {0,...,\maxX + 1} {
+    for \x in {0,...,\drawLimit} {
       \prevY = \currY;
       \currY = floorEdge(\x);
       if \prevY == \y then {
@@ -108,6 +107,7 @@
       };
     };
     if not(\isRetSet) then {
+      print {hi};
       \ret = \maxY;
     };
     return \ret;
@@ -149,6 +149,7 @@ $C=\C, g = \g, \rho_1 = \rhol, \rho_2 = \rhoZ$.
 Запросы на предоставление услуги 2-го типа сначала заполняют зарезервированную емкость.
 
 \subsection{Пространство состояний}
+\label{sec:space}
 
 \begin{gather*}
   \mathcal{X} = \left\{(n_1, n_2): 0 \leq n_1 \leq g, 0 \leq
@@ -160,6 +161,7 @@ $C=\C, g = \g, \rho_1 = \rhol, \rho_2 = \rhoZ$.
 \end{gather*}
 
 \subsection{Схема модели}
+\label{sec:model}
 
 \begin{tikzpicture}[]
   \foreach \x in {0,...,\maxX}
@@ -197,6 +199,7 @@ $C=\C, g = \g, \rho_1 = \rhol, \rho_2 = \rhoZ$.
 \end{tikzpicture}
 
 \subsection{Множества блокировок запросов $B_1, B_2$}
+\label{sec:block}
 
 \tikzmath{
   print {$B_1 = \{$};
@@ -220,6 +223,7 @@ $C=\C, g = \g, \rho_1 = \rhol, \rho_2 = \rhoZ$.
 }
 
 \subsection{Множества приемов запросов $S_1, S_2$}
+\label{sec:accept}
 
 \tikzmath{
   print {$S_1 = X \setminus B_1 = \{$};
@@ -246,6 +250,7 @@ $C=\C, g = \g, \rho_1 = \rhol, \rho_2 = \rhoZ$.
 }
 
 \subsection{Распределение вероятностей состояния системы $p(n_1, n_2)$}
+\label{sec:dist}
 
 \begin{multicols}{3}
   \noindent
@@ -288,7 +293,6 @@ import Text.Printf
 import System.Directory
 import Text.Regex.Posix
 import qualified Data.Map as M
-import qualified Data.List as L
 import qualified Data.Text as T
 import System.IO
 import Data.Maybe
@@ -313,13 +317,15 @@ stationaryProbabilityDistribution rho1 rho2 edge maxX n1 n2 = p0 * f n1 n2
         factorial i = i * factorial (i - 1)
 \end{code}
 
-Определим вероятность блокировки по времени для запросов на представление услуг 1-го типа 
+Определим вероятность блокировки по времени для запросов на представление услуг 1-го и 2-го типов
 \begin{code}
-timeBlockingProbability1 :: (Double -> Double) -> Double -> (Double -> Double -> Double) -> Double
+timeBlockingProbability1
+  :: (Double -> Double) -> Double -> (Double -> Double -> Double) -> Double
 timeBlockingProbability1 inv limit statProbDist
   = sum [statProbDist i j | j <- [0 .. limit], i <- [inv j]]
 
-timeBlockingProbability2 :: (Double -> Double) -> Double -> (Double -> Double -> Double) -> Double
+timeBlockingProbability2
+  :: (Double -> Double) -> Double -> (Double -> Double -> Double) -> Double
 timeBlockingProbability2 edge limit statProbDist
   = sum [statProbDist i j | i <- [0 .. limit], j <- [edge i]]
 \end{code}
@@ -355,22 +361,58 @@ averageRequests2 edge limit statProbDist
 \verb!  \end{tabular}!
 
 Это отличается от предыдущих лабораторных работ.
+В них только код на Haskell должен был взаимодействовать с этими значениями.
+Но в этой программе нам необходимо дополнительно сгенерировать схему модели \autoref{sec:model}.
+Ее мы генерируем с помощью пакета Ti\textit{k}Z.
+Множества блокировок \autoref{sec:block} и приемов \autoref{sec:accept} также сгенерированны
+с использованием Ti\textit{k}Z или, вернее, с использованием библиотеки Ti\textit{k}Z math.
+Для них мы задаем все переменные в специальном окружении:
 
+\noindent
+\verb!  tikzmath{!\\
+\verb!    \C = 7;!\\
+\verb!    \g = 4;!\\
+\verb!    \lambdal = 1;!\\
+\verb!    \lambdaZ = 2;!\\
+\verb!    \m = 2;!\\
+\verb!    \rhol = \lambdal / \m;!\\
+\verb!    \rhoZ = \lambdaZ / \m;!\\
+\verb!    function edge(\x) { return (\C - \x) / 2; };!\\
+\verb!  }!\\
+
+Теперь форма аргументов немного другая и поэтому нам нужно поменять код,
+который их находит.
+Здесь мы также задаем функцию прямой, которая ограничиваент наше пространство сосотяний,
+чтобы использовать ее в Haskell, нам тоже надо ее найти,
+распарсить и преобразовать в нормальную функцию Haskell.
+
+Объявим тип для хранения полеченных данных из файла.
 \begin{code}
-replace :: String -> String -> String -> String
-replace a b str = T.unpack $ T.replace (T.pack a) (T.pack b) $ T.pack str
-
 data TaskParams
   = TaskParams{ function    :: IO (Either Hint.InterpreterError (Double -> Double))
               , rawFunction :: String
               , variables   :: M.Map String Double }
+\end{code}
 
+Вспомогательная функция замены.
+\begin{code}
+replace :: String -> String -> String -> String
+replace a b str = T.unpack $ T.replace (T.pack a) (T.pack b) $ T.pack str
+\end{code}
+
+Получим наши параметры.
+\begin{code}
 taskParams :: String -> TaskParams
 taskParams haystack = TaskParams{ function  = func
                                 , rawFunction = raw
                                 , variables = vars }
   where
     (func, raw) = getEdgeFun
+\end{code}
+
+Здесь мы находим нашу функцию, преобразовываем ее как строку, заменяем константы в ней на их значения
+и динамично парсим ее как функцию Haskell.
+\begin{code}
     getEdgeFun ::(IO (Either Hint.InterpreterError (Double -> Double)), String)
     getEdgeFun = (eval @(Double -> Double)
                  $ prepFun
@@ -378,10 +420,18 @@ taskParams haystack = TaskParams{ function  = func
                  , rawFunc)
       where
         rawFunc = escape findEdgeFun
+\end{code}
+
+\texttt{eval} позволяет нам читать строку как кусок кода.
+\begin{code}
         eval :: forall t. Typeable t => String -> IO (Either Hint.InterpreterError t)
         eval s = Hint.runInterpreter $ do
           Hint.setImports ["Prelude"]
           Hint.interpret s (Hint.as :: t)
+\end{code}
+
+Эти функции "переводят" текст функции из языка Ti\textit{k}Z в Haskell.
+\begin{code}
         prepFun :: String -> String
         prepFun fun = "\\x -> fromIntegral $ floor $ " ++ fun
         escape = replace "\\" " "
@@ -391,6 +441,10 @@ taskParams haystack = TaskParams{ function  = func
           = replaceVariables (tail vs) (replace name (show value) fun)
           where
             (name, value) = head vs
+\end{code}
+
+Здесь мы находим функцию, используя регулярное выражение.
+\begin{code}
         findEdgeFun :: String
         findEdgeFun = head subMatches
           where
@@ -398,6 +452,11 @@ taskParams haystack = TaskParams{ function  = func
                 :: (String, String, String, [String])
             funRegex
               = "^\\s*function\\s+edge\\(\\\\x\\)\\s+\\{\\s*return\\s+(.*);\\s*\\};\\s*$"
+\end{code}
+
+Эта часть уже знакома из предыдущих работ.
+Здесь мы находим параметры задачи.
+\begin{code}
     getVars :: String -> M.Map String Double
     getVars = M.map read . M.fromList . map getParts . getLines
       where
@@ -410,16 +469,21 @@ taskParams haystack = TaskParams{ function  = func
                 :: (String, String, String, [String])
         valueRegex = "^\\s*\\\\([a-zA-Z0-9{}]+)\\s*=\\s*([0-9.]+);\\s*$"
     vars = getVars haystack
+\end{code}
 
+Эта функция позвольяет нам найти обратную функцию к функции грани пространства.
+\begin{code}
 getInverseEdge :: (Double -> Double) -> Double -> (Double -> Double)
 getInverseEdge edge limit = inverseEdge
   where
     inverseEdge :: Double -> Double
-    inverseEdge y = last (valueTable !! floor y)
-    valueTable = map L.sort $ foldl f (replicate maxY []) [(x, y) | x <- [0 .. limit], y <- [0 .. edge x]]
+    inverseEdge y = valueTable !! floor y
+    valueTable = map maximum
+               $ foldl collectRows (replicate maxY []) [(x, y) | x <- [0 .. limit]
+                                                               , y <- [0 .. edge x]]
       where
-        f :: [[Double]] -> (Double, Double) -> [[Double]]
-        f acc (x, y) = zipWith (curry g) acc [0 .. length acc]
+        collectRows :: [[Double]] -> (Double, Double) -> [[Double]]
+        collectRows acc (x, y) = zipWith (curry g) acc [0 .. length acc]
           where
             g :: ([Double], Int) -> [Double]
             g (lst, idx)
@@ -445,7 +509,9 @@ plotBlockingProb mu statRho edge limit dir name =
     layout_title .= name
     setColors [opaque blue]
     let spd l = stationaryProbabilityDistribution (l / mu) statRho edge limit
-      in plot (line "" [[(l, sum [spd l i j | i <- [0 .. limit], j <- [edge i]]) | l <- [0 .. 100]]])
+      in plot (line "" [[(l, sum [spd l i j | i <- [0 .. limit]
+                                            , j <- [edge i]])
+                                            | l <- [0 .. 100]]])
 
 plotAverageRequests
   :: Double -> Double -> (Double -> Double) -> Double -> FilePath -> String -> IO ()
@@ -454,7 +520,8 @@ plotAverageRequests mu statRho edge limit dir name =
     layout_title .= name
     setColors [opaque blue, opaque red]
     let spd l = stationaryProbabilityDistribution (l / mu) statRho edge limit
-      in plot (line "" [[(l, averageRequests1 edge limit (spd l) + averageRequests2 edge limit (spd l)) | l <- [0 .. 100]]])
+      in plot (line "" [[(l, averageRequests1 edge limit (spd l)
+                           + averageRequests2 edge limit (spd l)) | l <- [0 .. 100]]])
 \end{code}
 
 Будем сохранять их в специальную директорию,
@@ -467,23 +534,29 @@ plotAverageRequests mu statRho edge limit dir name =
 запишем его в отдельный \LaTeX{} файл, а затем включим его в отчет
 используя \verb!\include!.
 
-Но сначала, нам нужна функция, которая подсчитает интересующие нас
-параметры и запишет их в отдельный файл.
+В этой лабораторной работе нам потребуются три файла вывода.
 
+\begin{enumerate}
+
+\item Вывод распределения вероятностей состояния системы в красивом виде \autoref{sec:dist}
 \begin{code}
 writeProbDist
   :: Double -> Double -> Double -> (Double -> Double) -> FilePath -> IO ()
 writeProbDist rho1 rho2 maxX edge fname = do
   writeFile fname
     $ printf "%% Automatically generated output file!\n"
-      ++ concat [format n1 n2 (stationaryProbabilityDistribution rho1 rho2 edge maxX n1 n2)
-        | n1 <- [0 .. maxX], n2 <- [0 .. edge n1]]
+    ++ concat [format n1 n2 (stationaryProbabilityDistribution rho1 rho2 edge maxX n1 n2)
+      | n1 <- [0 .. maxX], n2 <- [0 .. edge n1]]
   where
     format :: Double -> Double -> Double -> String
     format n1 n2 = printf "$(%d, %d) = %.5f$\\\\\n" (floor n1 :: Int) (floor n2 :: Int)
+\end{code}
 
+\item Вывод итоговых параметров \autoref{sec:results}
+\begin{code}
 writeSummary
-  :: Double -> Double -> Double -> Double -> (Double -> Double) -> (Double -> Double) -> FilePath -> IO ()
+  :: Double -> Double -> Double -> Double -> (Double -> Double) -> (Double -> Double)
+  -> FilePath -> IO ()
 writeSummary rho1 rho2 maxX maxY edge inv fname = do
   let statProbDist = stationaryProbabilityDistribution rho1 rho2 edge maxX
       avgReq1 = averageRequests1 inv maxY statProbDist
@@ -502,7 +575,11 @@ writeSummary rho1 rho2 maxX maxY edge inv fname = do
     ++ printf "Среднее число запросов обоих типов& $\\overline{N}$ & = & %f\n"
         (avgReq1 + avgReq2)
     ++ printf "\\end{tabular}"
+\end{code}
 
+\item Вывод функции, ограничивающей пространство состояния,
+динамично в выражении условия задачи \autoref{sec:space}
+\begin{code}
 writeEdgeFunToOutput :: String -> FilePath -> IO ()
 writeEdgeFunToOutput func fname = do
   writeFile fname
@@ -512,6 +589,7 @@ writeEdgeFunToOutput func fname = do
     prepFun :: String -> String
     prepFun fun = "n_2 \\leq" ++ replace "x" "n_1" fun
 \end{code}
+\end{enumerate}
 
 \subsection{\texttt{main} функция}
 
@@ -540,7 +618,7 @@ main = do
         maxY = fromInteger $ floor $ max (edge 0) (edge maxX)
     createDirectoryIfMissing True texDir
     writeEdgeFunToOutput rawFunc (texDir ++ "fun.tex")
-    writeProbDist rho1 rho2 g edge (texDir ++ "prob.tex")
+    writeProbDist rho1 rho2 maxX edge (texDir ++ "prob.tex")
     writeSummary rho1 rho2 maxX maxY edge inv (texDir ++ "output.tex")
     createDirectoryIfMissing True imgDir 
     plotBlockingProb mu rho1 edge maxX imgDir "Blocking Probability (E2) for lambda2"
@@ -552,6 +630,7 @@ main = do
 \end{code}
 
 \section{Результаты}
+\label{sec:results}
 
 \begingroup
 \let\clearpage\relax
@@ -563,7 +642,7 @@ main = do
 
 \includesvg[width=220pt]{Blocking_Probability_(E2)_for_lambda1.svg}
 \includesvg[width=220pt]{Blocking_Probability_(E2)_for_lambda2.svg}
-
-\includesvg[width=220pt]{Average_Requests_(N)_for_lambda1.svg}
-\includesvg[width=220pt]{Average_Requests_(N)_for_lambda2.svg}
+%
+% \includesvg[width=220pt]{Average_Requests_(N)_for_lambda1.svg}
+% \includesvg[width=220pt]{Average_Requests_(N)_for_lambda2.svg}
 \end{document}
