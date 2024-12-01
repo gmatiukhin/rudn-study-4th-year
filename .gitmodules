@@ -1,3 +1,6 @@
 [submodule "infosec"]
 	path = infosec
 	url = https://github.com/gmatiukhin/study_2024-2025_infosec
+[submodule "prog-eng"]
+	path = prog-eng
+	url = https://github.com/gmatiukhin/prog-eng.git
