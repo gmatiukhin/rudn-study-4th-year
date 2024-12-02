@@ -11,13 +11,19 @@ class EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-class Type(StrEnum):
+class AutoNameEnum(StrEnum):
+    @staticmethod
+    def _generate_next_value_(name, start, count, last_values) -> str:
+        return name
+
+
+class Type(AutoNameEnum):
     Type1 = auto()
     Type2 = auto()
 
 
-class Role(StrEnum):
-    Ddns = auto()
+class Role(AutoNameEnum):
+    Ddns = "Ddns"
     Dns = auto()
     Gateway = auto()
     Router = auto()
@@ -32,5 +38,6 @@ class Pc:
 
 if __name__ == "__main__":
     for c in list(product(Type, Role)):
-        with open(f"items/pc_{c[0]}_{c[1]}.json", "w") as f:
-            json.dump(Pc(c[0], c[1]), f, indent=2, cls=EnhancedJSONEncoder)
+        with open(f"items/pc_{c[0]}_{c[1]}.json".lower(), "w") as f:
+            pc = Pc(c[0], c[1])
+            json.dump(pc, f, indent=2, cls=EnhancedJSONEncoder)
