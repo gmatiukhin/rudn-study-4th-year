@@ -50,9 +50,16 @@
 //!   выбора даты тестирования.
 //! - Если среди тестов, выбранных для данного компьютера, есть тест 5,
 //!   то тестирование должно производиться не позднее чем через 14 дней после даты производства.
+mod model;
 
-use std::sync::Arc;
+use std::{
+    cell::RefCell,
+    path::{Path, PathBuf},
+    rc::Rc,
+    sync::Arc,
+};
 
+use model::*;
 use serde_json::json;
 use zen_engine::{
     handler::custom_node_adapter::NoopCustomNode,
@@ -60,14 +67,80 @@ use zen_engine::{
     DecisionEngine,
 };
 
-mod model;
+use tokio::{
+    fs::{self, DirEntry, File},
+    io::AsyncReadExt,
+};
 
-fn main() {
-    let engine = DecisionEngine::new(
-        Arc::new(FilesystemLoader::new(FilesystemLoaderOptions {
-            root: "/decisions",
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Name of the decision.
+    /// Should correspond to the name of the file in ./decisions
+    #[arg(short, long)]
+    decision: String,
+
+    /// Path to a directory with items to decide upon.
+    #[arg(short, long)]
+    items_dir: PathBuf,
+}
+
+#[tokio::main]
+async fn main() {
+    let args = Args::parse();
+
+    let engine = DecisionEngine::default().with_loader(Arc::new(FilesystemLoader::new(
+        FilesystemLoaderOptions {
+            root: "./decisions",
             keep_in_memory: true,
-        })),
-        Arc::new(NoopCustomNode),
-    );
+        },
+    )));
+
+    let deadline_decision = engine
+        .get_decision(&format!("{}.json", args.decision))
+        .await
+        .unwrap();
+
+    let pcs = get_pcs(&args.items_dir).await;
+    for pc in pcs {
+        println!("Evaluating: {:?}.", pc);
+        let result = deadline_decision.evaluate(pc.into()).await;
+        match result {
+            Ok(resp) => println!("{:?}", resp),
+            Err(e) => println!("{:?}", e),
+        }
+    }
+}
+
+async fn get_pcs(path: &Path) -> Vec<Pc> {
+    async fn read_one_file(path: &Path) -> Pc {
+        let mut file = File::open(&path)
+            .await
+            .unwrap_or_else(|_| panic!("Coult not open file: {:?}", &path));
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .await
+            .unwrap_or_else(|_| panic!("Coult not read file: {:?}", &path));
+        serde_json::from_str(&contents).unwrap_or_else(|_| panic!("Ill-formed JSON in: {:?}", path))
+    }
+
+    if path.is_dir() {
+        let mut entries = fs::read_dir(&path)
+            .await
+            .unwrap_or_else(|_| panic!("Coult not read directory: {:?}", &path));
+
+        let mut pcs = vec![];
+        while let Some(entry) = entries.next_entry().await.unwrap() {
+            if entry.metadata().await.unwrap().is_dir() {
+                continue;
+            }
+            pcs.push(read_one_file(&entry.path()).await)
+        }
+
+        pcs
+    } else {
+        vec![read_one_file(path).await]
+    }
 }
