@@ -2,6 +2,7 @@ import json
 from enum import StrEnum, auto
 import dataclasses
 from itertools import product
+import os
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
@@ -37,6 +38,7 @@ class Pc:
 
 
 if __name__ == "__main__":
+    os.makedirs("items", exist_ok=True)
     for c in list(product(Type, Role)):
         with open(f"items/pc_{c[0]}_{c[1]}.json".lower(), "w") as f:
             pc = Pc(c[0], c[1])
