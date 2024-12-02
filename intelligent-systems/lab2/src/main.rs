@@ -60,6 +60,8 @@ use zen_engine::{
     DecisionEngine,
 };
 
+mod model;
+
 fn main() {
     let engine = DecisionEngine::new(
         Arc::new(FilesystemLoader::new(FilesystemLoaderOptions {
