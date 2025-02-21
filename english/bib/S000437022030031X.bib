@@ -1,0 +1,13 @@
+@article{GRASTIEN2020103271,
+title = {CPCES: A planning framework to solve conformant planning problems through a counterexample guided refinement},
+journal = {Artificial Intelligence},
+volume = {284},
+pages = {103271},
+year = {2020},
+issn = {0004-3702},
+doi = {https://doi.org/10.1016/j.artint.2020.103271},
+url = {https://www.sciencedirect.com/science/article/pii/S000437022030031X},
+author = {Alban Grastien and Enrico Scala},
+keywords = {Conformant planning, Classical planning, Propositional satisfiability},
+abstract = {We introduce cpces, a novel planner for the problem of deterministic conformant planning. cpces solves the problem by producing candidate plans based on a sample of the initial belief state, searching for counter-examples to these plans, and assigning these counter-examples to the sample, until a valid plan has been produced or the problem has been proved unfeasible. On top of providing a means to compute a conformant plan, the sample can also be understood as a justification for the plan being found, or relevant reasons why a plan cannot be found. We study the theoretical properties that cpces enjoys—correctness, completeness, and optimality—and how the several variants of cpces we describe differ in behaviour. Moreover, we establish a theoretical connection between the cpces framework and well-known concepts from the literature such as tags and width. With this connection we prove the worst case complexity for some variants of cpces. Finally, we show how cpces can be used in a more incremental fashion by learning sequencing of actions from the previous plan being found. Such a technique mimics the use of macro-operators, widely used in automated planning to speedup resolution. Our theoretical analysis is accompanied with a thorough experimental evaluation of the (many) possible incarnations of cpces. This not only proves our theoretical findings from an empirical perspective, but also shows that cpces is able to handle problems that have been traditionally hard to solve by the existing conformant planners, whilst remaining competitive over “easier” conformant planning problems. Importantly, cpces is able to prove many unsolvable conformant planning problems as such, extending substantially the reach of conformant planners.}
+}
